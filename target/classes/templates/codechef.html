@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+    <style>
+        #cont-table {
+            width: 50%;
+            aspect-ratio: 4/1;
+            left:50%
+            padding: 40px 0;
+            border: solid black 2px;
+            overflow-y: auto;
+            scroll-padding: 10px;
+            height: 380px;
+        }
+        .cc{
+            font-size: 20px;
+            position: absolute;
+            top:30%;
+            left:30%;
+            align-items: center;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+        table.cnts{
+            width:100%;
+            font-family: Arial, Helvetica, sans-serif;
+            text-align: center;
+            border-collapse: collapse;
+            overflow-y: auto;
+            height: 400px;
+        }
+        table.cnts th{
+            position: sticky;
+            font-size: larger;
+        }
+        table.cnts tr{
+            height: 40px;
+        }
+
+    </style>
+<head>
+    <meta charset="UTF-8">
+    <title>CodeChef Rating</title>
+</head>
+<body>
+    <div th:if="${rating==null}" class="cc">
+        <h1>Enter your CodeChef User ID</h1>
+        <form action="/fetchCodechefRating" method="get">
+            <label for="userId">User ID:</label>
+            <input type="text" id="userId" name="userId" required>
+            <input type="submit" value="Fetch Rating">
+        </form>
+    </div>
+    <div th:if="${rating!=null}">
+        <div id="det">
+            <h2><span th:text="${rating.name}"></span></h2>
+            <img th:src="${rating.picurl}" width="120" height="120">
+            <p><b>Username:</b>
+                <span th:style=${rating.strsty} th:text="${rating.stars}"></span>
+                <span th:text="${rating.userId}"></span></p>
+            <p><b>Rating: </b><span th:text="${rating.rating}"></span></p>
+        </div>
+        <div style="position: absolute; top: 0%; left:60%; overflow: hidden">
+            <iframe scrolling="no" border="none" height="270" width="600" th:src="@{'https://codechef-api.vercel.app/heatmap/'+${rating.userId}}"></iframe>
+        </div>
+        <div id="cont-table">
+            <table id="table" class="cnts" cellpadding=0 border="2px">
+                <caption><h3>CONTESTS</h3></caption>
+                <tr>
+                    <th>S.No.</th>
+                    <th>Name</th>
+                    <th>Code</th>
+                    <th>Rating</th>
+                    <th>Date</th>
+                </tr>
+            </table>
+            <script th:inline="javascript">
+                /*<![CDATA[*/
+                    var temp = [[${rating.tbl}]];
+                /*]]>*/
+                    console.log(temp.length);
+                    for(var i = temp.length-1; i>=0; i--){
+                        var nme = temp[i][3].substring(0,temp[i][3].length-8);
+                        var dte = temp[i][2].substring(0,temp[i][2].length-9);
+                        document.getElementsByTagName("table")[0].innerHTML +=
+                        "<tr><td>"+(temp.length-i)+"</td><td>"+nme+
+                            "</td><td>"+temp[i][0]+"</td><td>"+temp[i][1]+
+                                "</td><td>"+dte+"</td></tr>";
+                    };
+            </script>
+        </div>
+            
+    </div>
+</body>
+</html>

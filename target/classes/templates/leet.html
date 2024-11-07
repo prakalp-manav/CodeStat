@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+<style>
+    #cont-table {
+        width: 50%;
+        left: 50%;
+        border: solid black 2px;
+        overflow-y: auto;
+        scroll-padding: 10px;
+        height: 340px;
+    }
+
+    #main {
+        width: 100%;
+        height: 330px;
+        justify-content: space-between;
+        display: flex;
+    }
+
+    #main-down {
+        width: 100%;
+        height: 340px;
+        justify-content: space-between;
+        display: flex;
+    }
+
+    .cc {
+        font-size: 20px;
+        position: absolute;
+        top: 30%;
+        left: 30%;
+        align-items: center;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .info {
+        font-size: 30px;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .weaklin {
+        background-color: grey;
+        color: white;
+        float: left;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        padding: 14px 16px;
+        font-size: 17px;
+        width: 33.3333333%;
+    }
+
+    .weaklin:hover {
+        background-color: darkgrey;
+    }
+
+    .wkar {
+        font-size: 30px;
+        text-align: center;
+        align-items: center;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    #weak {
+        width: 300px;
+        text-align: center;
+    }
+
+    table.cnts {
+        width: 100%;
+        font-family: Arial, Helvetica, sans-serif;
+        text-align: center;
+        border-collapse: collapse;
+        overflow-y: auto;
+        height: 200px;
+    }
+
+    #active {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 20px;
+        width: 49%;
+        height: 100px;
+        text-align: center;
+    }
+
+    .weakdiv {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 20px;
+        width: 48%;
+        height: 290px;
+        position: absolute;
+        top: 56%;
+        left: 51%;
+        text-align: center;
+    }
+
+    table.cnts caption {
+        position: sticky;
+        top: 0;
+        background-color: gray;
+        color: white;
+        z-index: 1;
+    }
+
+    table.weaks {
+        width: 100%;
+        font-family: Arial, Helvetica, sans-serif;
+        text-align: center;
+        border-collapse: collapse;
+        overflow-y: auto;
+        height: 240px;
+        text-transform: capitalize;
+    }
+
+    table.weaks th {
+        font-size: larger;
+    }
+
+    #uns td {
+        font-size: 15px;
+    }
+
+    table.cnts th {
+        font-size: larger;
+    }
+
+    table.cnts tr {
+        height: 40px;
+    }
+</style>
+
+<head>
+    <meta charset="UTF-8">
+    <title>LeetCode Rating</title>
+</head>
+
+<body>
+    <div th:if="${rating==null}" class="cc">
+        <h1>Enter your LeetCode User ID</h1>
+        <form action="/fetchLeetRating" method="get">
+            <label for="userId">User ID:</label>
+            <input type="text" id="userId" name="userId" required>
+            <input type="submit" value="Fetch Rating">
+        </form>
+    </div>
+    <div th:if="${rating!=null}">
+        <div id="main">
+            <div id="det">
+                <h2><span th:text="${rating.name}" class="info"></span></h2>
+                <img th:src="${rating.picurl}" width="150" height="150">
+                <p style="font-size:15px;font-family:Arial, Helvetica, sans-serif;"><b>Username:</b>
+                    <span th:text="${rating.userId}"></span>
+                </p>
+                <p><b>Rating: </b><span th:text="${rating.rating}"></span></p>
+            </div>
+            <div id="weak" style="text-align: center;">
+                <h2><span th:class="wkar" style="text-align:center;">Weak Areas</span></h2>
+                <table class="weaks" border="2px">
+                    <tr>
+                        <th>Topics</th>
+                    </tr>
+                </table>
+            </div>
+            <div id="pie-chart">
+                <canvas id="myChart" style="width:100%;max-width:300px;max-height:300px;"></canvas>
+            </div>
+        </div>
+        <div id="main-down">
+            <div id="cont-table">
+                <table class="cnts" border="2px">
+                    <caption style="background-color:gray;color:white;">
+                        <h3>CONTESTS</h3>
+                    </caption>
+                    <tr>
+                        <th>S.No.</th>
+                        <th>Name</th>
+                        <th>Rating</th>
+                        <th>Gained</th>
+                        <th>Date</th>
+                    </tr>
+                </table>
+            </div>
+            <div id="active">
+                <button class="weaklin" onclick="show('uns',this)">About</button>
+                <button class="weaklin" onclick="show('cont',this)" id="defaultOpen">Quick Problems</button>
+                <button class="weaklin" onclick="show('pwe',this)">Practice Weak</button>
+            </div>
+            <div id="uns" class="weakdiv">
+                <h3><b>No. of Problems solved = </b><span th:text="${rating.totalprb}"></span></h3>
+                <h3><b>No. of Contests  = </b><span th:text="${rating.tbl.size()}"></span></h3>
+                <h3><b>Global Rank = </b><span th:text="${rating.globrank}"></span></h3>
+            </div>
+            <div id="cont" class="weakdiv">
+                <table id="tcont" class="weaks" border="2px" style="height:292px;width:101%">
+                </table>
+            </div>
+            <div id="pwe" class="weakdiv">
+                <table id="tpwe" class="weaks" border="2px" style="height:292px;width:101%">
+                </table>
+            </div>
+        </div>
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            var temp = [[${ rating.tbl }]];
+            var temp1 = [[${ rating.uns }]];
+            var temp2 = [[${ rating.unss }]];
+            var prb = [[${ rating.prbl }]];
+            /*]]>*/
+            const xValues = [];
+            const yValues = [];
+            for (let key in prb) {
+                xValues.push(key);
+                yValues.push(Number(prb[key]));
+            }
+            srt = Object.keys(prb).sort(function (a, b) {
+                return prb[a] - prb[b];
+            })
+            let tot = 6;
+            for (let i = 0; i < srt.length; i++) {
+                if (tot != 0) {
+                    tot -= 1;
+                    document.getElementsByClassName("weaks")[0].innerHTML += "<tr><td>" + srt[i] + "</td></tr>";
+                    document.getElementById("tpwe").innerHTML += "<tr><td align='left' style='font-size:15px'>&nbsp&nbsp&nbsp&nbsp<a href='https://leetcode.com/problemset/?topicSlugs=" + srt[i].toLowerCase().replace(" ","-") + "&page=1' target='_blank'>" + srt[i] + "</a></td></tr>";
+
+                }
+                else {
+                    break;
+                }
+
+            }
+            console.log(srt[0]);
+            console.log(prb);
+            const barColors = [];
+            for (let i = 0; i < Object.keys(prb).length; i++) {
+                barColors.push(`hsl(${Math.floor(Math.random() * 360)}, 100%, 75%)`);
+            }
+            console.log(Object.keys(prb).length);
+            new Chart("myChart", {
+                type: "doughnut",
+                data: {
+                    labels: xValues,
+                    datasets: [{
+                        backgroundColor: barColors,
+                        data: yValues
+                    }]
+                },
+                options: {
+
+                    maintainAspectRatio: false,
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        position: 'left',
+                        font: {
+                            size: 50
+                        },
+                        display: true,
+                        text: "SOLVED AREAS"
+                    }
+                }
+            });
+            let oldr = 0;
+            for (var i = temp.length-1; i>=0; i--) {
+                let gain = parseInt(temp[i][1]) - oldr;
+                document.getElementsByClassName("cnts")[0].innerHTML +=
+                    "<tr><td>" + (temp.length-i) + "</td><td>" + temp[i][0] +
+                    "</td><td>" + parseInt(temp[i][1]) + "</td><td>" + temp[i][2] +
+                    "</td><td>" + temp[i][3] + "</td></tr>";
+                oldr = parseInt(temp[i][1]);
+            }
+            var num = 6;
+            for (var i of Object.keys(temp2)) {
+                if (num < 0) {
+                    break;
+                }
+                num = num - 1;
+                var linkid = temp2[i][0];
+                var fin = "";
+                var num2 = 2;
+                for (var j = 1; j < temp2[i].length; j++) {
+                    if (num2 < 0) {
+                        break;
+                    }
+                    num2 = num2 - 1;
+                    fin += " #" + temp2[i][j];
+                }
+                document.getElementById("tcont").innerHTML += "<tr><td align='left' style='font-size:15px'>&nbsp&nbsp&nbsp&nbsp<a href=https://leetcode.com/problems/" + linkid + "/description"+ " target='_blank'>" + i + "</a>&nbsp&nbsp&nbsp&nbsp<span style='float: right; font-size: 12px; color: #777;'>" + fin + "</span></td></tr>";
+            }
+            function show(ele, ment) {
+                var i, tabcontent, tablinks;
+                tabcontent = document.getElementsByClassName("weakdiv");
+                for (i = 0; i < tabcontent.length; i++) {
+                    tabcontent[i].style.display = "none";
+                }
+                tabcontent = document.getElementsByClassName("weaklin");
+                for (i = 0; i < tabcontent.length; i++) {
+                    tabcontent[i].style.backgroundColor = "darkgray";
+                }
+                document.getElementById(ele).style.display = "block";
+                ment.style.backgroundColor = 'gray';
+            }
+            document.getElementById("defaultOpen").click();
+        </script>
+    </div>
+</body>
+
+</html>

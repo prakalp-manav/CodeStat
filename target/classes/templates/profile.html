@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<style>
+    .cc {
+        font-size: 20px;
+        position: absolute;
+        top: 30%;
+        left: 30%;
+        align-items: center;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .info {
+        font-size: 20px;
+        width: 50%;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .pg-container {
+        display: flex;
+        justify-content: space-around;
+        background-color: grey;
+    }
+
+    .pg {
+        color: white;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        padding: 14px 16px;
+        font-size: 17px;
+        text-align: center;
+        text-decoration: none;
+        width: 25%;
+    }
+
+    .pg:hover {
+        background-color: darkgrey;
+    }
+
+    #weak {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .wkar {
+        font-size: 30px;
+        text-align: center;
+        align-items: center;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    table.weaks {
+        width: 100%;
+        font-family: Arial, Helvetica, sans-serif;
+        text-align: center;
+        border-collapse: collapse;
+        overflow-y: auto;
+        text-transform: capitalize;
+    }
+    .down{
+        left:25%;
+        position:absolute;
+    }
+
+    table.weaks th {
+        font-size: larger;
+    }
+
+    iframe {
+        -moz-transform: scale(0.75, 0.75);
+        -webkit-transform: scale(0.75, 0.75);
+        -o-transform: scale(0.75, 0.75);
+        -ms-transform: scale(0.75, 0.75);
+        transform: scale(0.75, 0.75);
+        -moz-transform-origin: top left;
+        -webkit-transform-origin: top left;
+        -o-transform-origin: top left;
+        -ms-transform-origin: top left;
+        transform-origin: top left;
+    }
+</style>
+
+<head>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js" type="text/javascript"></script>
+    <meta charset="UTF-8">
+    <title>Profile</title>
+</head>
+
+<body>
+    <div th:if="${profiles == null}" class="cc">
+        <h1>Enter your Username</h1>
+        <form action="/getProfiles" method="get">
+            <label for="username">User ID:</label>
+            <input type="text" id="username" name="username" required>
+            <input type="submit" value="Fetch Profiles">
+        </form>
+    </div>
+    <div id="sec" th:if="${profiles != null}">
+        <div class="pg-container">
+            <a class="pg">Home</a>
+            <a class="pg" th:href="@{/fetchCodeforcesRating(userId=${profiles.cf_id})}">CodeForces</a>
+            <a class="pg" th:href="@{/fetchCodechefRating(userId=${profiles.cc_id})}">CodeChef</a>
+            <a class="pg" th:href="@{/fetchLeetRating(userId=${profiles.leet_id})}">LeetCode</a>
+        </div>
+        <div id="weak">
+            <div class="info">
+                <p><b>Name: </b><span th:text="${profiles.name}"></span></p>
+                <p><b>Username: </b><span th:text="${profiles.username}"></span></p>
+                <p><b>CodeForces: </b><span th:text="${profiles.cf_id}"></span></p>
+                <p><b>CodeChef: </b><span th:text="${profiles.cc_id}"></span></p>
+                <p><b>LeetCode: </b><span th:text="${profiles.leet_id}"></span></p>
+            </div>
+            <div id="todo" style="text-align: center;">
+                <h2><span class="wkar" style="text-align:center;">UPCOMING CONTESTS</span></h2>
+                <table class="weaks" border="2px">
+                    <tr>
+                        <th>Topics</th>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="down">
+            <img width="240" height="240" src="https://cdn-b.saashub.com/images/app/service_logos/175/r59iw60rtoxu/large.png?1620450530" alt="CF">
+            <img height="240" width="240" src="https://cdn-1.webcatalog.io/catalog/codechef/codechef-icon-filled-256.png?v=1714773964077" alt="CF">
+            <img height="240" width="240" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTaRFQOY55ILUfxAMD-QQE_nRFL7wSlIX_RJQ&s" alt="CF">
+
+        </div>
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            var temp = [[${ inf.cont }]];
+            /*]]>*/
+            console.log(temp);
+            for (let i = 0; i < temp.length; i++) {
+                document.getElementsByClassName("weaks")[0].innerHTML += "<tr><td>" + temp[i].split('|')[0] + "</td></tr>";
+            }
+        </script>
+    </div>
+</body>
+
+</html>
